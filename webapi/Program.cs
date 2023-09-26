@@ -1,3 +1,8 @@
+using Microsoft.EntityFrameworkCore;
+using webapi.Database;
+using webapi.Database.Interface;
+using webapi.Database.Repository;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -6,6 +11,10 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// DI
+builder.Services.AddDbContext<Db>(options => options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddTransient<IShortUrlRepository, ShortUrlRepository>();
 
 var app = builder.Build();
 
