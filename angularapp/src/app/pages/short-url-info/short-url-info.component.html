@@ -1,0 +1,11 @@
+<div class="container mt-5">
+    <h2>Short URL Details</h2>
+    <div *ngIf="shortUrl">
+        <p><strong>Id:</strong> {{ shortUrl.id }}</p>
+        <p><strong>Short URL:</strong> {{ shortUrl.shortUrl }}</p>
+        <p><strong>Original URL:</strong> {{ shortUrl.url }}</p>
+        <p><strong>Created by:</strong> {{ shortUrl.createdBy }}</p>
+        <p><strong>Created at:</strong> {{ shortUrl.createdAt }}</p>
+    </div>
+    <button class="btn btn-primary" [routerLink]="['/short-urls']">Back to List</button>
+</div>

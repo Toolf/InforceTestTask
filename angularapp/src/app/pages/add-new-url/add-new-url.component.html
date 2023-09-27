@@ -1,0 +1,14 @@
+<div class="container mt-5">
+    <h2>Add New URL</h2>
+    <form (ngSubmit)="onSubmit()">
+        <div class="form-group">
+            <label for="originalUrl">Original URL:</label>
+            <input type="text" id="originalUrl" name="originalUrl" class="form-control" [(ngModel)]="newUrl" required>
+        </div>
+        <!-- Display an error message if the URL already exists -->
+        <div *ngIf="urlAlreadyExists" class="alert alert-danger">
+            URL already exists.
+        </div>
+        <button type="submit" class="btn btn-primary">Create Short URL</button>
+    </form>
+</div>

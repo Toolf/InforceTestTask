@@ -1,0 +1,55 @@
+<div class="container mt-5">
+    <h2>Short URLs</h2>
+
+    <button *ngIf="isAuthorizedToAddNewUrl()" class="btn btn-success" [routerLink]="['/add-new-url']">
+        Add New URL
+    </button>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Short URL</th>
+                <th>Original URL</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let shortUrl of shortUrls">
+                <td>{{ shortUrl.id }}</td>
+                <td>{{ shortUrl.shortUrl }}</td>
+                <td>{{ shortUrl.url }}</td>
+                <td>
+                    <button *ngIf="isAuthorizedToDelete(shortUrl)" class="btn btn-danger"
+                        (click)="onDeleteShortUrl(shortUrl.id)">
+                        Delete
+                    </button>
+                    <button *ngIf="isAuthorizedToDelete(shortUrl)" class="btn btn-primary"
+                        [routerLink]="['/short-urls', shortUrl.id]">
+                        View Details
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <nav *ngIf="totalItems > itemsPerPage">
+        <ul class="pagination">
+            <li class="page-item" [class.disabled]="currentPage === 1">
+                <a class="page-link" (click)="onPageChange(currentPage - 1)" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            <li class="page-item" *ngFor="let page of getPageArray()" [class.active]="page === currentPage">
+                <a class="page-link" (click)="onPageChange(page)">{{ page }}</a>
+            </li>
+            <li class="page-item" [class.disabled]="currentPage === totalItems">
+                <a class="page-link" (click)="onPageChange(currentPage + 1)" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+
+</div>

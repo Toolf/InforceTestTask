@@ -1,22 +1,29 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using webapi.Core.Pagination;
 using webapi.Database.Interface;
 using webapi.Domain.Entity.ShortUrl;
+using webapi.Domain.Interface.ShortUrl;
+using webapi.Domain.Service.ShortUrl;
+
 namespace webapi.Controller;
 
 [ApiController]
 [Route("[controller]")]
+[EnableCors("OpenCORSPolicy")]
 public class ShortUrlController : ControllerBase
 {
     private readonly ILogger<ShortUrlController> _logger;
     private readonly IShortUrlRepository _urlRepository;
+    private readonly IShortUrlService _shortUrlService;
 
-    public ShortUrlController(ILogger<ShortUrlController> logger, IShortUrlRepository urlRepository)
+    public ShortUrlController(ILogger<ShortUrlController> logger, IShortUrlRepository urlRepository, IShortUrlService shortUrlService)
     {
         _logger = logger;
         _urlRepository = urlRepository;
+        _shortUrlService = shortUrlService;
     }
 
     [HttpGet("redirect/{shortUrl}")]
@@ -57,7 +64,12 @@ public class ShortUrlController : ControllerBase
         }
 
         ShortUrlCreate shortUrlCreate = new() { Url = url, CreatedBy = userId };
-        long id = _urlRepository.Create(shortUrlCreate, "someurl_" + shortUrlCreate.Url);
+        var shortUrl = _shortUrlService.GenerateShortUrl(url);
+        long id = _urlRepository.Create(shortUrlCreate, shortUrl);
+        if (id == -1) 
+        {
+            return BadRequest("Url already exists");
+        }
         return Ok(id);
     }
 
@@ -77,7 +89,7 @@ public class ShortUrlController : ControllerBase
                 bool res = _urlRepository.Delete(id);
                 return Ok(res);
             } else {
-                return BadRequest("No access");
+                return BadRequest("No access or entity not found");
             }
         }
         else

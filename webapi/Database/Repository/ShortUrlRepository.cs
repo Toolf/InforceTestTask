@@ -13,8 +13,17 @@ public class ShortUrlRepository : IShortUrlRepository
     {
         _db = db;
     }
+
+    /*
+        Return -1 if url already exists 
+    */
     public long Create(ShortUrlCreate shortUrlCreate, string shortUrl)
     {
+        var shortUrlId = _db.ShortUrl
+            .Where(e => e.Url == shortUrlCreate.Url)
+            .Select(e => e.Id)
+            .FirstOrDefault();
+        if (shortUrlId == null) return -1;
         ShortUrlModel shortUrlModel = new()
         {
             CreatedAt = DateTime.Now,
@@ -71,7 +80,12 @@ public class ShortUrlRepository : IShortUrlRepository
 
     public bool IsCreatedBy(long id, long userId)
     {
-        throw new NotImplementedException();
+        return  _db.ShortUrl
+            .Where(e => e.Id == id)
+            .Where(e => e.CreatedBy == userId)
+            .Select(e => true)
+            .Count() != 0;
+     
     }
 
     public PaginationResponse<ShortUrlShortInfo> List(PaginationRequest req)

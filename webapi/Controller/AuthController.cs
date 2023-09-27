@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using webapi.Domain.Entity.Auth;
@@ -9,6 +10,7 @@ namespace webapi.Controller;
 
 [ApiController]
 [Route("[controller]")]
+[EnableCors("OpenCORSPolicy")]
 public class AuthController : ControllerBase
 {
     private readonly ILogger<ShortUrlController> _logger;
@@ -22,7 +24,8 @@ public class AuthController : ControllerBase
         _jwtService = jwtService;
     }
 
-    [HttpPost("login")]
+    [Route("login")]
+    [HttpPost]
     public IActionResult Login(Credentials credentials)
     {
         var user = _authService.AuthenticateUser(credentials);
@@ -67,9 +70,12 @@ public class AuthController : ControllerBase
 
         if (userIdClaim != null && userRoleClaim != null)
         {
-            var userId = userIdClaim.Value;
+            if (!int.TryParse(userIdClaim?.Value, out int userId))
+            {
+                return Unauthorized();
+            }
             var userRole = userRoleClaim.Value;
-
+         
             return Ok(new { UserId = userId, UserRole = userRole });
         }
         else

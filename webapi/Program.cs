@@ -57,6 +57,19 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+// CORS
+
+string CORSOpenPolicy = "OpenCORSPolicy";
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(
+      name: CORSOpenPolicy,
+      builder => {
+          builder.WithOrigins("*").AllowAnyHeader().AllowAnyMethod();
+      });
+});
+
 // Swagger
 builder.Services.AddSwaggerGen(option =>
 {
@@ -97,6 +110,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors(CORSOpenPolicy);
 
 app.UseAuthorization();
 
