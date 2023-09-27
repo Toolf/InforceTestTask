@@ -20,7 +20,8 @@
   <ItemGroup>
     <Folder Include="Core\Pagination\" />
     <Folder Include="Database\Repository\" />
-    <Folder Include="Domain\Service\" />
+    <Folder Include="Domain\Entity\Auth\" />
+    <Folder Include="Domain\Service\Auth\" />
   </ItemGroup>
 
 </Project>

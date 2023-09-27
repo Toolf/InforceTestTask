@@ -40,7 +40,7 @@ public class ShortUrlRepository : IShortUrlRepository
         
     }
 
-    public ShortUrlInfo GetById(long id)
+    public ShortUrlInfo FindById(long id)
     {
         var shortUrl = _db.ShortUrl
             .Where(e => e.Id == id)

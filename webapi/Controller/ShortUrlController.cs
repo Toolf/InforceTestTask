@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using webapi.Core.Pagination;
 using webapi.Database.Interface;
 using webapi.Domain.Entity.ShortUrl;
@@ -29,13 +31,15 @@ public class ShortUrlController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [Authorize]
     public ShortUrlInfo Details(long id)
     {
-        var shortUrlInfo = _urlRepository.GetById(id);
+        var shortUrlInfo = _urlRepository.FindById(id);
         return shortUrlInfo;
     }
 
     [HttpGet("list")]
+    [AllowAnonymous]
     public PaginationResponse<ShortUrlShortInfo> List([FromQuery]  PaginationRequest req)
     {
         var res = _urlRepository.List(req);
@@ -43,17 +47,42 @@ public class ShortUrlController : ControllerBase
     }
 
     [HttpPost]
-    public long Create(string url)
+    [Authorize]
+    public ActionResult Create(string url)
     {
-        ShortUrlCreate shortUrlCreate = new() { Url = url, CreatedBy = 1 };
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdClaim?.Value, out int userId))
+        {
+            return Unauthorized();
+        }
+
+        ShortUrlCreate shortUrlCreate = new() { Url = url, CreatedBy = userId };
         long id = _urlRepository.Create(shortUrlCreate, "someurl_" + shortUrlCreate.Url);
-        return id;
+        return Ok(id);
     }
 
     [HttpDelete]
-    public bool Delete(long id)
+    [Authorize]
+    public ActionResult Delete(long id)
     {
-        bool res = _urlRepository.Delete(id);
-        return res;
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        var userRoleClaim = User.FindFirst(ClaimTypes.Role);
+
+        if (userIdClaim != null && userRoleClaim != null)
+        {
+            var userRole = userRoleClaim.Value;
+            if (!int.TryParse(userIdClaim.Value, out int userId)) return Unauthorized();
+            if (userRole == "admin" || _urlRepository.IsCreatedBy(id, userId))
+            {
+                bool res = _urlRepository.Delete(id);
+                return Ok(res);
+            } else {
+                return BadRequest("No access");
+            }
+        }
+        else
+        {
+            return Unauthorized();
+        }
     }
 }
